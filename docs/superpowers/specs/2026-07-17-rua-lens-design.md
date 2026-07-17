@@ -289,8 +289,11 @@ XMLレポート単位のD1 transaction
 初期値は以下とする。
 
 - 1回のアップロード: 最大20ファイル
+- 1回のアップロードに含まれる圧縮前ファイルの合計: 最大25 MiB
 - 圧縮前の1ファイル: 最大10 MiB
 - 展開後のXML: 1件最大20 MiB
+- 1つの圧縮ファイルから展開するデータの合計: 最大30 MiB
+- 1回のアップロードで展開するデータの合計: 最大50 MiB
 - ZIP内エントリー: 最大100件
 - ZIP内はXMLだけ処理
 - パスワード付きZIPは非対応
@@ -309,26 +312,32 @@ XMLレポート単位のD1 transaction
 
 集計は`report_records.count`で重み付けする。
 
-### 正常
-
-- `policy_evaluated.dkim = pass`
-- または`policy_evaluated.spf = pass`
-
-aligned DKIMまたはaligned SPFのどちらか一方が成功すればDMARC成功とする。
+表示区分は以下の優先順で1つに決定する。
 
 ### 要確認
 
-- DKIMとSPFが両方failで、dispositionが`none`
-- またはpolicy overrideが存在する
+1. policy overrideが存在するレコード
+2. DKIMとSPFが両方failで、dispositionが`none`のレコード
 
-監視段階、未適用ポリシー、転送などの可能性があり、即座にブロック済みとは判断できない状態として表示する。
+転送などの理由で認証評価が上書きされた場合や、監視段階・未適用ポリシーでブロックされていない場合を、即座に「正常」または「失敗」と断定しない。
+
+### 正常
+
+要確認に該当せず、以下のどちらかを満たすレコード。
+
+- `policy_evaluated.dkim = pass`
+- `policy_evaluated.spf = pass`
+
+aligned DKIMまたはaligned SPFのどちらか一方が成功すればDMARC成功とする。
 
 ### 失敗
 
-- DKIMとSPFが両方fail
-- かつdispositionが`quarantine`または`reject`
+要確認と正常のどちらにも該当せず、以下を両方満たすレコード。
 
-DMARC成功率は正常メッセージ数を総メッセージ数で割って算出する。
+- DKIMとSPFが両方fail
+- dispositionが`quarantine`または`reject`
+
+DMARC成功率は表示区分とは独立して、aligned DKIMまたはaligned SPFがpassしたメッセージ数を総メッセージ数で割って算出する。policy overrideにより表示上「要確認」となったレコードでも、aligned認証がpassしていればDMARC成功数へ含める。
 
 ## 14. API
 
@@ -349,7 +358,7 @@ D1上で以下を集計して返す。
 - 総メッセージ数
 - DMARC成功数・成功率
 - 正常・要確認・失敗
-- 日別推移
+- 日別推移（レポートの集計開始Unix時刻をUTC日付へ変換して集約）
 - disposition内訳
 - 失敗送信元IP上位
 - 対象ドメイン一覧
