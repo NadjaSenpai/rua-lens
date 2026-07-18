@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<feedback>
+  <report_metadata>
+    <org_name>Example Reporter</org_name>
+    <report_id>example-report-multiple</report_id>
+    <date_range><begin>1700086400</begin><end>1700172800</end></date_range>
+    <ignored>ignored</ignored>
+  </report_metadata>
+  <policy_published><domain>example.com</domain><p>quarantine</p></policy_published>
+  <record>
+    <row>
+      <source_ip>198.51.100.20</source_ip><count>2</count>
+      <policy_evaluated><disposition>none</disposition><dkim>pass</dkim><spf>fail</spf></policy_evaluated>
+    </row>
+    <identifiers><header_from>example.com</header_from></identifiers>
+    <auth_results>
+      <dkim><domain>example.com</domain><selector>first</selector><result>pass</result><human_result>aligned</human_result></dkim>
+      <dkim><domain>example.com</domain><selector>second</selector><result>fail</result></dkim>
+      <spf><domain>relay.example.com</domain><scope>mfrom</scope><result>pass</result></spf>
+      <spf><domain>helo.example.com</domain><scope>helo</scope><result>neutral</result></spf>
+    </auth_results>
+  </record>
+  <record>
+    <row>
+      <source_ip>203.0.113.30</source_ip><count>3</count>
+      <policy_evaluated>
+        <disposition>quarantine</disposition><dkim>fail</dkim><spf>fail</spf>
+        <reason><type>forwarded</type><comment>example forwarding service</comment></reason>
+        <reason><type>local_policy</type></reason>
+      </policy_evaluated>
+    </row>
+    <identifiers><header_from>example.com</header_from><envelope_to>recipient@example.com</envelope_to></identifiers>
+    <auth_results><dkim><domain>example.com</domain><result>fail</result></dkim></auth_results>
+  </record>
+</feedback>
