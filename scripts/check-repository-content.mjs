@@ -127,9 +127,13 @@ const history = spawnSync("git", ["log", "--all", "-p", "--format="], {
   maxBuffer: 100 * 1024 * 1024,
 });
 if (history.status === 0) {
-  scanCommonContent("Git history", history.stdout);
+  scanCommonContent("Git history", history.stdout, { checkUrls: false });
+  for (const match of history.stdout.matchAll(/https?:\/\/([A-Z0-9.-]+\.(?:cloudflareaccess\.com|pages\.dev|workers\.dev))/gi)) {
+    if (!isAllowedHost(match[1])) addFailure("Git history", `operational URL host ${match[1]}`);
+  }
   for (const match of history.stdout.matchAll(/<(?:domain|header_from|envelope_from|envelope_to)>\s*([^<\s]+)\s*</gi)) {
-    const value = match[1].toLowerCase();
+    const rawValue = match[1].toLowerCase();
+    const value = rawValue.includes("@") ? rawValue.split("@").at(-1) : rawValue;
     if (value !== "example.com" && !value.endsWith(".example.com")) {
       addFailure("Git history", `non-example XML domain ${match[1]}`);
     }
