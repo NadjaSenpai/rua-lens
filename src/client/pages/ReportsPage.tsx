@@ -46,7 +46,6 @@ export function ReportsPage() {
     <section className="page-stack">
       <header className="page-heading">
         <div>
-          <p className="eyebrow">Report archive</p>
           <h2>レポート</h2>
           <p>取り込んだDMARC aggregate reportを期間と対象ドメインで確認します。</p>
         </div>
@@ -121,7 +120,7 @@ export function ReportsPage() {
                   <tr key={item.id}>
                     <td>{item.orgName}</td>
                     <td><code>{item.domain}</code></td>
-                    <td>{formatDate(item.periodBegin)} – {formatDate(item.periodEnd)}</td>
+                    <td>{formatDate(item.periodBegin)} - {formatDate(item.periodEnd)}</td>
                     <td className="numeric">{item.totalMessages.toLocaleString("ja-JP")}</td>
                     <td className="numeric">{formatRate(item.dmarcPassRate)}</td>
                     <td>{formatDateTime(item.importedAt)}<small>{item.importedBy}</small></td>

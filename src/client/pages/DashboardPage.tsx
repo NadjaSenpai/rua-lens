@@ -45,7 +45,7 @@ export function DashboardPage() {
   const filterForm = (
     <form
       key={queryKey}
-      className="filter-bar dashboard-filters"
+      className="query-row dashboard-filters"
       onSubmit={(event) => {
         event.preventDefault();
         const form = new FormData(event.currentTarget);
@@ -110,16 +110,17 @@ export function DashboardPage() {
     <section className="page-stack dashboard-page" aria-busy={Boolean(error)}>
       <header className="page-heading">
         <div>
-          <p className="eyebrow">DMARC posture</p>
           <h2>ダッシュボード</h2>
           <p>DMARC成功と表示区分を分けて、送信状況をメッセージ数で集計します。</p>
         </div>
       </header>
-      <div className="scope-strip" aria-label="現在の対象範囲">
-        <span>{scope.domain ?? "すべてのドメイン"}</span>
-        <span>{scope.from ?? "開始日指定なし"} → {scope.to ?? "終了日指定なし"}</span>
-        <span>UTC</span>
-      </div>
+      <section className="scope-strip" aria-label="現在の対象範囲">
+        <dl>
+          <div><dt>対象</dt><dd>{scope.domain ?? "すべてのドメイン"}</dd></div>
+          <div><dt>期間</dt><dd>{scope.from ?? "開始日指定なし"} - {scope.to ?? "終了日指定なし"}</dd></div>
+          <div><dt>時刻基準</dt><dd>UTC</dd></div>
+        </dl>
+      </section>
       {filterForm}
       {error ? (
         <ErrorNotice
@@ -175,7 +176,7 @@ function RecentReports({ reports }: { reports: DashboardResponse["recentReports"
   return (
     <section className="panel">
       <div className="section-heading">
-        <div><p className="eyebrow">Recently imported</p><h3>直近のレポート</h3></div>
+        <h3>直近のレポート</h3>
         <Link to="/reports">すべて確認</Link>
       </div>
       <div className="table-scroll" tabIndex={0}>
@@ -188,7 +189,7 @@ function RecentReports({ reports }: { reports: DashboardResponse["recentReports"
               <tr key={report.id}>
                 <td><Link to={`/reports/${encodeURIComponent(report.id)}`}>{report.orgName}</Link></td>
                 <td><code>{report.domain}</code></td>
-                <td>{formatDate(report.periodBegin)} – {formatDate(report.periodEnd)}</td>
+                <td>{formatDate(report.periodBegin)} - {formatDate(report.periodEnd)}</td>
                 <td className="numeric">{report.totalMessages.toLocaleString("ja-JP")}</td>
                 <td className="numeric">{(report.dmarcPassRate * 100).toFixed(1)}%</td>
               </tr>

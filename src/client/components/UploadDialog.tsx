@@ -77,7 +77,6 @@ export function UploadDialog({
     >
       <div className="dialog-header">
         <div>
-          <p className="eyebrow">Secure local processing</p>
           <h2 id="upload-dialog-title">DMARCレポートをアップロード</h2>
         </div>
         <button className="text-button" type="button" onClick={close} disabled={submitting}>

@@ -59,14 +59,15 @@ export function AppShell() {
     <div className="app-shell">
       <a className="skip-link" href="#main-content">本文へ移動</a>
       <header className="app-header">
-        <div className="brand-block">
-          <p className="eyebrow">DMARC aggregate report viewer</p>
-          <h1>RUA Lens</h1>
+        <div className="header-identity">
+          <div className="brand-block">
+            <h1>RUA Lens</h1>
+          </div>
+          <nav className="primary-nav" aria-label="メインナビゲーション">
+            <NavLink to="/" end>ダッシュボード</NavLink>
+            <NavLink to="/reports">レポート</NavLink>
+          </nav>
         </div>
-        <nav className="primary-nav" aria-label="メインナビゲーション">
-          <NavLink to="/" end>ダッシュボード</NavLink>
-          <NavLink to="/reports">レポート</NavLink>
-        </nav>
         <div className="header-actions">
           <span className="user-email">{session.email}</span>
           <button className="primary-button" type="button" onClick={openUpload}>

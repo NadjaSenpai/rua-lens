@@ -103,7 +103,9 @@ describe("DashboardPage", () => {
     expect(within(summary).getByText("失敗 3")).toBeInTheDocument();
     expect(screen.getByRole("figure", { name: "DMARC成功・失敗の日別推移" })).toBeInTheDocument();
     expect(screen.getByRole("table", { name: "日別データ" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Disposition内訳" })).toHaveTextContent("quarantine");
+    const dispositions = screen.getByRole("region", { name: "Disposition内訳" });
+    expect(dispositions).toHaveTextContent("quarantine");
+    expect(within(dispositions).getByText("30.0%")).toBeInTheDocument();
     expect(screen.getByRole("table", { name: "失敗送信元IP" })).toHaveTextContent("192.0.2.10");
     expect(screen.getByRole("link", { name: "Example Reporter" })).toHaveAttribute("href", "/reports/report-1");
   });

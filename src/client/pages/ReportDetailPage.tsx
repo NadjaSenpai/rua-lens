@@ -47,9 +47,8 @@ export function ReportDetailPage() {
       <Link className="back-link" to="/reports">← レポート一覧へ</Link>
       <header className="page-heading page-heading--actions">
         <div>
-          <p className="eyebrow">Report detail</p>
           <h2>{report.orgName}</h2>
-          <p><code>{report.domain}</code> · {formatDate(report.periodBegin)} – {formatDate(report.periodEnd)}</p>
+          <p><code>{report.domain}</code> · {formatDate(report.periodBegin)} - {formatDate(report.periodEnd)}</p>
         </div>
         {session.isAdmin ? (
           <button className="danger-button" type="button" onClick={() => setDeleteOpen(true)}>
@@ -82,7 +81,6 @@ export function ReportDetailPage() {
       <section className="record-stack">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Source records</p>
             <h3>送信元IP別レコード</h3>
           </div>
           <span>{report.records.length}件</span>
@@ -100,8 +98,8 @@ export function ReportDetailPage() {
                 <div><dt>disposition</dt><dd>{record.disposition}</dd></div>
                 <div><dt>DMARC成功</dt><dd>{record.dmarcPass ? "成功" : "失敗"}</dd></div>
                 <div><dt>header_from</dt><dd>{record.identifiers.headerFrom}</dd></div>
-                <div><dt>envelope_from</dt><dd>{record.identifiers.envelopeFrom ?? "—"}</dd></div>
-                <div><dt>envelope_to</dt><dd>{record.identifiers.envelopeTo ?? "—"}</dd></div>
+                <div><dt>envelope_from</dt><dd>{record.identifiers.envelopeFrom ?? "未設定"}</dd></div>
+                <div><dt>envelope_to</dt><dd>{record.identifiers.envelopeTo ?? "未設定"}</dd></div>
               </dl>
               <div className="auth-grid">
                 <section>
@@ -121,7 +119,7 @@ export function ReportDetailPage() {
                     <ul>
                       {record.dkimResults.map((result, resultIndex) => (
                         <li key={`${result.domain}-${result.selector ?? "none"}-${resultIndex}`}>
-                          {result.domain} — {result.result}
+                          {result.domain} - {result.result}
                           {result.selector ? ` · selector: ${result.selector}` : ""}
                           {result.humanResult ? ` · ${result.humanResult}` : ""}
                         </li>
@@ -135,7 +133,7 @@ export function ReportDetailPage() {
                     <ul>
                       {record.spfResults.map((result, resultIndex) => (
                         <li key={`${result.domain}-${result.scope ?? "none"}-${resultIndex}`}>
-                          {result.domain} — {result.result}{result.scope ? ` · scope: ${result.scope}` : ""}
+                          {result.domain} - {result.result}{result.scope ? ` · scope: ${result.scope}` : ""}
                         </li>
                       ))}
                     </ul>

@@ -17,6 +17,8 @@ test("uploads a report, renders analysis, survives direct navigation, and delete
   await expect(summary).toContainText("総メッセージ数");
   await expect(summary).toContainText("4");
   await expect(page.getByRole("figure", { name: "DMARC成功・失敗の日別推移" })).toBeVisible();
+  await page.getByText("日別データを表で確認", { exact: true }).click();
+  await expect(page.getByRole("table", { name: "日別データ" })).toBeVisible();
 
   await page.locator('nav[aria-label="メインナビゲーション"]').getByRole("link", { name: "レポート", exact: true }).click();
   await expect(page.locator("caption")).toHaveText("1件のレポート");

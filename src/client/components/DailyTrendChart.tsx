@@ -14,42 +14,43 @@ export function DailyTrendChart({ values }: { values: DashboardResponse["dailyTr
   return (
     <figure className="panel trend-figure" aria-label="DMARC成功・失敗の日別推移">
       <div className="section-heading">
-        <div>
-          <p className="eyebrow">UTC daily trend</p>
-          <h3>DMARC成功・失敗の日別推移</h3>
-        </div>
+        <h3>DMARC成功・失敗の日別推移</h3>
       </div>
       <div className="chart-frame">
         <ResponsiveContainer width="100%" height={320}>
           <LineChart data={values} margin={{ top: 12, right: 18, bottom: 4, left: 4 }} accessibilityLayer>
-            <CartesianGrid stroke="#dfe8e2" strokeWidth={1} vertical={false} />
-            <XAxis dataKey="date" tick={{ fill: "#4d685d", fontSize: 12 }} tickLine={false} axisLine={{ stroke: "#cbd9d1" }} />
-            <YAxis tick={{ fill: "#4d685d", fontSize: 12 }} tickLine={false} axisLine={false} width={52} />
+            <CartesianGrid stroke="var(--chart-grid)" strokeWidth={1} vertical={false} />
+            <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 12 }} tickLine={false} axisLine={{ stroke: "var(--border-strong)" }} />
+            <YAxis tick={{ fill: "var(--muted)", fontSize: 12 }} tickLine={false} axisLine={false} width={52} />
             <Tooltip
-              cursor={{ stroke: "#8ca398", strokeWidth: 1 }}
-              contentStyle={{ border: "1px solid #cbd9d1", borderRadius: 12, background: "#ffffff" }}
-              labelStyle={{ color: "#17231f", fontWeight: 700 }}
+              cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
+              contentStyle={{ border: "1px solid var(--border-strong)", borderRadius: 4, background: "var(--surface)" }}
+              labelStyle={{ color: "var(--ink)", fontWeight: 700 }}
+              itemStyle={{ color: "var(--ink)" }}
             />
-            <Legend />
+            <Legend formatter={(value) => <span style={{ color: "var(--ink)" }}>{value}</span>} />
             <Line
               dataKey="dmarcPassMessages"
               name="DMARC成功"
-              stroke="#2a78d6"
+              stroke="var(--chart-pass)"
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              dot={{ r: 4, fill: "#2a78d6", stroke: "#ffffff", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#2a78d6", stroke: "#ffffff", strokeWidth: 2 }}
+              dot={values.length === 1 ? { r: 4, fill: "var(--surface)", stroke: "var(--chart-pass)", strokeWidth: 2 } : false}
+              activeDot={{ r: 5, fill: "var(--chart-pass)", stroke: "var(--surface)", strokeWidth: 2 }}
+              isAnimationActive={false}
             />
             <Line
               dataKey="dmarcFailMessages"
               name="DMARC失敗"
-              stroke="#e34948"
+              stroke="var(--chart-fail)"
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              dot={{ r: 4, fill: "#e34948", stroke: "#ffffff", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#e34948", stroke: "#ffffff", strokeWidth: 2 }}
+              strokeDasharray="6 4"
+              dot={values.length === 1 ? { r: 4, fill: "var(--surface)", stroke: "var(--chart-fail)", strokeWidth: 2 } : false}
+              activeDot={{ r: 5, fill: "var(--chart-fail)", stroke: "var(--surface)", strokeWidth: 2 }}
+              isAnimationActive={false}
             />
           </LineChart>
         </ResponsiveContainer>

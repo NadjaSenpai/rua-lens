@@ -24,6 +24,7 @@ describe("AppShell", () => {
     }));
 
     expect(await screen.findByRole("heading", { name: "RUA Lens" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "本文へ移動" })).toHaveAttribute("href", "#main-content");
     expect(screen.getByRole("navigation", { name: "メインナビゲーション" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "ダッシュボード" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "レポート" })).toBeInTheDocument();

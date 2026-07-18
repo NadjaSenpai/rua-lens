@@ -64,13 +64,12 @@ export function DeleteReportDialog({
         close();
       }}
     >
-      <p className="eyebrow">Administrator action</p>
       <h2 id="delete-dialog-title">レポートを削除</h2>
       <p>削除すると復元できません。関連する送信元IPと認証結果も削除されます。</p>
       <dl className="compact-details">
         <div><dt>提供元</dt><dd>{report.orgName}</dd></div>
         <div><dt>対象ドメイン</dt><dd>{report.domain}</dd></div>
-        <div><dt>集計期間</dt><dd>{formatDate(report.periodBegin)} – {formatDate(report.periodEnd)}</dd></div>
+        <div><dt>集計期間</dt><dd>{formatDate(report.periodBegin)} - {formatDate(report.periodEnd)}</dd></div>
       </dl>
       {error ? <ErrorNotice error={error} /> : null}
       <div className="dialog-actions">

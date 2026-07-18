@@ -2,9 +2,9 @@ import type { DashboardResponse } from "../../shared/api-contract";
 
 export function FailureSourceTable({ values }: { values: DashboardResponse["failureSources"] }) {
   return (
-    <section className="panel">
+    <section className="panel evidence-panel">
       <div className="section-heading">
-        <div><p className="eyebrow">Failure sources</p><h3>失敗送信元IP</h3></div>
+        <h3>失敗送信元IP</h3>
       </div>
       {values.length === 0 ? <p>この条件では失敗送信元はありません。</p> : (
         <div className="table-scroll" tabIndex={0}>
