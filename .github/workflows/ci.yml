@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: cp wrangler.jsonc.example wrangler.jsonc
+      - run: cp .dev.vars.example .dev.vars
+      - run: npm run cf-typegen
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:worker
+      - run: npm run test:ui
+      - run: npm run test:limits
+      - run: npm exec -- playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run build
+      - run: npm exec -- wrangler deploy --dry-run
+      - run: npm run check:public-artifacts
+      - run: npm run check:repository-content
+      - run: npm run check:dependency-licenses
