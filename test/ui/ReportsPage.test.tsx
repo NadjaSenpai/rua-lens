@@ -11,11 +11,11 @@ const report = {
   orgName: "Example Reporter",
   externalReportId: "external-1",
   domain: "example.com",
-  periodBegin: "2023-11-14T00:00:00.000Z",
-  periodEnd: "2023-11-15T00:00:00.000Z",
+  periodBegin: "2023-11-14T18:30:00.000Z",
+  periodEnd: "2023-11-15T18:30:00.000Z",
   totalMessages: 42,
   dmarcPassRate: 0.75,
-  importedAt: "2023-11-16T02:00:00.000Z",
+  importedAt: "2023-11-16T18:30:00.000Z",
   importedBy: "analyst@example.com",
 };
 
@@ -30,10 +30,11 @@ function renderWithApi(api: ReturnType<typeof createTestApi>) {
 }
 
 describe("ReportsPage", () => {
-  it("shows provider, domain, period, totals, success rate, and import audit data", async () => {
+  it("shows report data in the selected display timezone", async () => {
     const api = createTestApi({
       listReports: async () => ({ items: [report], page: 1, pageSize: 25, total: 1 }),
     });
+    const user = userEvent.setup();
     renderWithApi(api);
 
     expect(await screen.findByRole("heading", { name: "レポート" })).toBeInTheDocument();
@@ -43,6 +44,15 @@ describe("ReportsPage", () => {
     expect(screen.getByText("75.0%")).toBeInTheDocument();
     expect(screen.getByText("analyst@example.com")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "詳細を確認" })).toHaveAttribute("href", "/reports/report-1");
+
+    const reportRow = screen.getByRole("row", { name: /Example Reporter/ });
+    expect(reportRow).toHaveTextContent("2023/11/14 - 2023/11/15");
+    expect(reportRow).toHaveTextContent("2023/11/16 18:30");
+
+    await user.click(screen.getByRole("radio", { name: "JST" }));
+
+    expect(reportRow).toHaveTextContent("2023/11/15 - 2023/11/16");
+    expect(reportRow).toHaveTextContent("2023/11/17 3:30");
   });
 
   it("updates API query from filters and pagination", async () => {
@@ -58,6 +68,7 @@ describe("ReportsPage", () => {
     renderWithApi(api);
     await screen.findByText("Example Reporter");
 
+    await user.click(screen.getByRole("radio", { name: "JST" }));
     await user.type(screen.getByLabelText("対象ドメイン"), "example.com");
     await user.type(screen.getByLabelText("開始日"), "2023-11-14");
     await user.type(screen.getByLabelText("終了日"), "2023-11-15");

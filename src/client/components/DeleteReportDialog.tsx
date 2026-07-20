@@ -1,16 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReportDetail } from "../../shared/api-contract";
 import { useRuaLensApi } from "../api/use-api";
+import { formatDisplayDate, type DisplayTimeZone } from "../date-time";
 import { ErrorNotice } from "./ErrorNotice";
 
 export function DeleteReportDialog({
   open,
   report,
+  displayTimeZone,
   onClose,
   onDeleted,
 }: {
   open: boolean;
   report: ReportDetail;
+  displayTimeZone: DisplayTimeZone;
   onClose: () => void;
   onDeleted: () => void;
 }) {
@@ -69,7 +72,7 @@ export function DeleteReportDialog({
       <dl className="compact-details">
         <div><dt>提供元</dt><dd>{report.orgName}</dd></div>
         <div><dt>対象ドメイン</dt><dd>{report.domain}</dd></div>
-        <div><dt>集計期間</dt><dd>{formatDate(report.periodBegin)} - {formatDate(report.periodEnd)}</dd></div>
+        <div><dt>集計期間</dt><dd>{formatDisplayDate(report.periodBegin, displayTimeZone)} - {formatDisplayDate(report.periodEnd, displayTimeZone)}</dd></div>
       </dl>
       {error ? <ErrorNotice error={error} /> : null}
       <div className="dialog-actions">
@@ -82,8 +85,4 @@ export function DeleteReportDialog({
       </div>
     </dialog>
   );
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value));
 }

@@ -3,17 +3,18 @@ import { Link, useSearchParams } from "react-router-dom";
 import type { DashboardResponse } from "../../shared/api-contract";
 import { useRuaLensApi } from "../api/use-api";
 import { DailyTrendChart } from "../components/DailyTrendChart";
-import { DateRangeFilter } from "../components/DateRangeFilter";
+import { DATE_RANGE_FILTER_NOTE, DateRangeFilter } from "../components/DateRangeFilter";
 import { DomainFilter } from "../components/DomainFilter";
 import { ErrorNotice } from "../components/ErrorNotice";
 import { FailureSourceTable } from "../components/FailureSourceTable";
 import { StatusBreakdown } from "../components/StatusBreakdown";
 import { SummaryCards } from "../components/SummaryCards";
 import { useAppShell } from "../components/app-shell-context";
+import { formatDisplayDate, type DisplayTimeZone } from "../date-time";
 
 export function DashboardPage() {
   const api = useRuaLensApi();
-  const { openUpload, refreshVersion } = useAppShell();
+  const { displayTimeZone, openUpload, refreshVersion } = useAppShell();
   const [searchParams, setSearchParams] = useSearchParams();
   const [result, setResult] = useState<{ queryKey: string; data: DashboardResponse } | null>(null);
   const [errorResult, setErrorResult] = useState<{ queryKey: string; error: unknown } | null>(null);
@@ -83,6 +84,7 @@ export function DashboardPage() {
           条件をリセット
         </button>
       </div>
+      <p className="filter-note">{DATE_RANGE_FILTER_NOTE}</p>
       {scopeError ? <p className="validation-error" role="alert">{scopeError}</p> : null}
     </form>
   );
@@ -108,20 +110,20 @@ export function DashboardPage() {
 
   return (
     <section className="page-stack dashboard-page" aria-busy={Boolean(error)}>
-      <header className="page-heading">
-        <div>
-          <h2>ダッシュボード</h2>
-          <p>DMARC成功と表示区分を分けて、送信状況をメッセージ数で集計します。</p>
-        </div>
+      <header className="dashboard-intro">
+        <h2>ダッシュボード</h2>
+        <p>選択した範囲のDMARC認証結果を確認します。</p>
       </header>
-      <section className="scope-strip" aria-label="現在の対象範囲">
-        <dl>
-          <div><dt>対象</dt><dd>{scope.domain ?? "すべてのドメイン"}</dd></div>
-          <div><dt>期間</dt><dd>{scope.from ?? "開始日指定なし"} - {scope.to ?? "終了日指定なし"}</dd></div>
-          <div><dt>時刻基準</dt><dd>UTC</dd></div>
-        </dl>
-      </section>
-      {filterForm}
+      <div className="dashboard-context">
+        <section className="scope-strip" aria-label="現在の対象範囲">
+          <dl>
+            <div><dt>対象</dt><dd>{scope.domain ?? "すべてのドメイン"}</dd></div>
+            <div><dt>期間</dt><dd>{scope.from ?? "開始日指定なし"} - {scope.to ?? "終了日指定なし"}</dd></div>
+            <div><dt>時刻基準</dt><dd>UTC</dd></div>
+          </dl>
+        </section>
+        {filterForm}
+      </div>
       {error ? (
         <ErrorNotice
           error={error}
@@ -159,28 +161,36 @@ export function DashboardPage() {
 
       {data && !empty ? (
         <>
-          <SummaryCards summary={data.summary} />
-          <DailyTrendChart values={data.dailyTrend} />
-          <div className="dashboard-columns">
+          <div className="dashboard-observation">
+            <SummaryCards summary={data.summary} />
+            <DailyTrendChart values={data.dailyTrend} />
+          </div>
+          <div className="dashboard-diagnostics">
             <StatusBreakdown values={data.dispositions} totalMessages={data.summary.totalMessages} />
             <FailureSourceTable values={data.failureSources} />
           </div>
-          <RecentReports reports={data.recentReports} />
+          <RecentReports reports={data.recentReports} displayTimeZone={displayTimeZone} />
         </>
       ) : null}
     </section>
   );
 }
 
-function RecentReports({ reports }: { reports: DashboardResponse["recentReports"] }) {
+function RecentReports({
+  reports,
+  displayTimeZone,
+}: {
+  reports: DashboardResponse["recentReports"];
+  displayTimeZone: DisplayTimeZone;
+}) {
   return (
-    <section className="panel">
+    <section className="panel recent-reports" aria-labelledby="recent-reports-heading">
       <div className="section-heading">
-        <h3>直近のレポート</h3>
+        <h3 id="recent-reports-heading">直近のレポート</h3>
         <Link to="/reports">すべて確認</Link>
       </div>
       <div className="table-scroll" tabIndex={0}>
-        <table>
+        <table aria-labelledby="recent-reports-heading">
           <thead>
             <tr><th scope="col">提供元</th><th scope="col">ドメイン</th><th scope="col">期間</th><th scope="col">メッセージ数</th><th scope="col">成功率</th></tr>
           </thead>
@@ -189,7 +199,7 @@ function RecentReports({ reports }: { reports: DashboardResponse["recentReports"
               <tr key={report.id}>
                 <td><Link to={`/reports/${encodeURIComponent(report.id)}`}>{report.orgName}</Link></td>
                 <td><code>{report.domain}</code></td>
-                <td>{formatDate(report.periodBegin)} - {formatDate(report.periodEnd)}</td>
+                <td>{formatDisplayDate(report.periodBegin, displayTimeZone)} - {formatDisplayDate(report.periodEnd, displayTimeZone)}</td>
                 <td className="numeric">{report.totalMessages.toLocaleString("ja-JP")}</td>
                 <td className="numeric">{(report.dmarcPassRate * 100).toFixed(1)}%</td>
               </tr>
@@ -199,8 +209,4 @@ function RecentReports({ reports }: { reports: DashboardResponse["recentReports"
       </div>
     </section>
   );
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value));
 }

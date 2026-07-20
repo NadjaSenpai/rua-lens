@@ -21,8 +21,9 @@ test("uploads a report, renders analysis, survives direct navigation, and delete
   await expect(page.getByRole("table", { name: "日別データ" })).toBeVisible();
 
   await page.locator('nav[aria-label="メインナビゲーション"]').getByRole("link", { name: "レポート", exact: true }).click();
-  await expect(page.locator("caption")).toHaveText("1件のレポート");
-  const row = page.getByRole("row").filter({ hasText: "E2E Reporter" });
+  const ledger = page.getByRole("region", { name: "レポート台帳" });
+  await expect(ledger).toContainText("1件");
+  const row = ledger.getByRole("row").filter({ hasText: "E2E Reporter" });
   await row.getByRole("link", { name: "詳細を確認" }).click();
   await expect(page.getByRole("heading", { name: "E2E Reporter", exact: true })).toBeVisible();
   await expect(page.getByText("192.0.2.10")).toBeVisible();

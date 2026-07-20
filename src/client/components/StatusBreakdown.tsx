@@ -11,7 +11,7 @@ export function StatusBreakdown({
 }) {
   const byDisposition = new Map(values.map((value) => [value.disposition, value.totalMessages]));
   return (
-    <section className="panel evidence-panel" role="region" aria-label="Disposition内訳">
+    <section className="panel evidence-panel diagnostic-panel diagnostic-panel--policy" role="region" aria-label="Disposition内訳">
       <div className="section-heading">
         <h3>Disposition内訳</h3>
       </div>

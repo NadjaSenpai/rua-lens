@@ -2,7 +2,7 @@ import type { DashboardResponse } from "../../shared/api-contract";
 
 export function FailureSourceTable({ values }: { values: DashboardResponse["failureSources"] }) {
   return (
-    <section className="panel evidence-panel">
+    <section className="panel evidence-panel diagnostic-panel diagnostic-panel--sources">
       <div className="section-heading">
         <h3>失敗送信元IP</h3>
       </div>

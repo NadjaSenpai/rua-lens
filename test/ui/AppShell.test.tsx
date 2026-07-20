@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
@@ -6,6 +6,7 @@ import { App } from "../../src/client/App";
 import { ApiProvider } from "../../src/client/api/context";
 import { ApiError } from "../../src/client/api/types";
 import { createTestApi } from "../support/test-api";
+import { setSystemColorScheme } from "./setup";
 
 function renderWithApi(api: ReturnType<typeof createTestApi>) {
   render(
@@ -18,7 +19,8 @@ function renderWithApi(api: ReturnType<typeof createTestApi>) {
 }
 
 describe("AppShell", () => {
-  it("shows product navigation, upload action, and the authenticated email", async () => {
+  it("shows product navigation, upload action, authenticated email, and display timezone controls", async () => {
+    const user = userEvent.setup();
     renderWithApi(createTestApi({
       getSession: async () => ({ email: "analyst@example.com", isAdmin: false }),
     }));
@@ -30,6 +32,57 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "レポート" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "レポートをアップロード" })).not.toHaveLength(0);
     expect(screen.getByText("analyst@example.com")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "時刻表示" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "UTC" })).toBeChecked();
+    expect(screen.getByRole("group", { name: "表示テーマ" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "自動" })).toBeChecked();
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
+
+    await user.click(screen.getByRole("radio", { name: "JST" }));
+
+    expect(screen.getByRole("radio", { name: "JST" })).toBeChecked();
+    expect(localStorage.getItem("rua-lens.display-time-zone")).toBe("Asia/Tokyo");
+    expect(screen.getByText("表示: JST / 検索・日別集計: UTC")).toBeInTheDocument();
+  });
+
+  it("restores the persisted display timezone", async () => {
+    localStorage.setItem("rua-lens.display-time-zone", "Asia/Tokyo");
+    renderWithApi(createTestApi());
+
+    expect(await screen.findByRole("radio", { name: "JST" })).toBeChecked();
+    expect(screen.getByText("表示: JST / 検索・日別集計: UTC")).toBeInTheDocument();
+  });
+
+  it("restores a persisted dark theme", async () => {
+    localStorage.setItem("rua-lens.theme-preference", "dark");
+    renderWithApi(createTestApi());
+
+    expect(await screen.findByRole("radio", { name: "ダーク" })).toBeChecked();
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByText("現在: ダーク")).toBeInTheDocument();
+  });
+
+  it("follows system color scheme changes while automatic theme is selected", async () => {
+    renderWithApi(createTestApi());
+
+    expect(await screen.findByRole("radio", { name: "自動" })).toBeChecked();
+    act(() => setSystemColorScheme("dark"));
+
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByText("現在: ダーク")).toBeInTheDocument();
+  });
+
+  it("keeps a manual theme when the system color scheme changes", async () => {
+    const user = userEvent.setup();
+    renderWithApi(createTestApi());
+    await screen.findByRole("radio", { name: "自動" });
+
+    await user.click(screen.getByRole("radio", { name: "ライト" }));
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
+    expect(localStorage.getItem("rua-lens.theme-preference")).toBe("light");
+
+    act(() => setSystemColorScheme("dark"));
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
   });
 
   it("shows a request ID and retries a failed session request", async () => {

@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { ReportsPageResponse } from "../../shared/api-contract";
 import { useRuaLensApi } from "../api/use-api";
+import { DATE_RANGE_FILTER_NOTE, DateRangeFilter } from "../components/DateRangeFilter";
 import { ErrorNotice } from "../components/ErrorNotice";
 import { useAppShell } from "../components/app-shell-context";
+import { formatDisplayDate, formatDisplayDateTime } from "../date-time";
 
 const PAGE_SIZE = 25;
 
 export function ReportsPage() {
   const api = useRuaLensApi();
-  const { refreshVersion } = useAppShell();
+  const { displayTimeZone, refreshVersion } = useAppShell();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<ReportsPageResponse | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -43,15 +45,14 @@ export function ReportsPage() {
   };
 
   return (
-    <section className="page-stack">
-      <header className="page-heading">
-        <div>
-          <h2>レポート</h2>
-          <p>取り込んだDMARC aggregate reportを期間と対象ドメインで確認します。</p>
-        </div>
+    <section className="page-stack reports-page">
+      <header className="page-context">
+        <h2>レポート</h2>
+        <p>取り込んだDMARC aggregate reportを期間と対象ドメインで確認します。</p>
       </header>
 
-      <form
+      <div className="context-frame reports-context">
+        <form
         key={queryKey}
         className="filter-bar"
         onSubmit={(event) => {
@@ -72,16 +73,14 @@ export function ReportsPage() {
           <span>対象ドメイン</span>
           <input name="domain" defaultValue={searchParams.get("domain") ?? ""} placeholder="example.com" />
         </label>
-        <label>
-          <span>開始日</span>
-          <input name="from" type="date" defaultValue={searchParams.get("from") ?? ""} />
-        </label>
-        <label>
-          <span>終了日</span>
-          <input name="to" type="date" defaultValue={searchParams.get("to") ?? ""} />
-        </label>
+        <DateRangeFilter
+          from={searchParams.get("from") ?? ""}
+          to={searchParams.get("to") ?? ""}
+        />
         <button className="secondary-button" type="submit">条件を適用</button>
-      </form>
+        <p className="filter-note">{DATE_RANGE_FILTER_NOTE}</p>
+        </form>
+      </div>
 
       {error ? (
         <ErrorNotice
@@ -92,18 +91,21 @@ export function ReportsPage() {
           }}
         />
       ) : null}
-      {!error && !data ? <p className="loading-state" aria-busy="true">レポートを読み込んでいます…</p> : null}
+      {!error && !data ? <p className="loading-state state-block" aria-busy="true">レポートを読み込んでいます…</p> : null}
       {data && data.items.length === 0 ? (
-        <section className="panel empty-panel">
+        <section className="state-block empty-panel">
           <h3>条件に一致するレポートはありません</h3>
           <p>対象ドメインまたは期間を変更してください。</p>
         </section>
       ) : null}
       {data && data.items.length > 0 ? (
-        <>
+        <section className="ledger-section reports-ledger" aria-labelledby="reports-ledger-heading">
+          <div className="section-heading">
+            <h3 id="reports-ledger-heading">レポート台帳</h3>
+            <span>{data.total}件</span>
+          </div>
           <div className="table-scroll" tabIndex={0}>
-            <table>
-              <caption>{data.total}件のレポート</caption>
+            <table aria-labelledby="reports-ledger-heading">
               <thead>
                 <tr>
                   <th scope="col">提供元</th>
@@ -120,10 +122,10 @@ export function ReportsPage() {
                   <tr key={item.id}>
                     <td>{item.orgName}</td>
                     <td><code>{item.domain}</code></td>
-                    <td>{formatDate(item.periodBegin)} - {formatDate(item.periodEnd)}</td>
+                    <td>{formatDisplayDate(item.periodBegin, displayTimeZone)} - {formatDisplayDate(item.periodEnd, displayTimeZone)}</td>
                     <td className="numeric">{item.totalMessages.toLocaleString("ja-JP")}</td>
                     <td className="numeric">{formatRate(item.dmarcPassRate)}</td>
-                    <td>{formatDateTime(item.importedAt)}<small>{item.importedBy}</small></td>
+                    <td>{formatDisplayDateTime(item.importedAt, displayTimeZone)}<small>{item.importedBy}</small></td>
                     <td><Link to={`/reports/${encodeURIComponent(item.id)}`}>詳細を確認</Link></td>
                   </tr>
                 ))}
@@ -149,7 +151,7 @@ export function ReportsPage() {
               次のページ
             </button>
           </nav>
-        </>
+        </section>
       ) : null}
     </section>
   );
@@ -172,16 +174,4 @@ function positivePage(value: string | null): number {
 
 function formatRate(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value));
-}
-
-function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(new Date(value));
 }

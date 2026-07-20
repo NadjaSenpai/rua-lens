@@ -5,12 +5,13 @@ import { useRuaLensApi } from "../api/use-api";
 import { DeleteReportDialog } from "../components/DeleteReportDialog";
 import { ErrorNotice } from "../components/ErrorNotice";
 import { useAppShell } from "../components/app-shell-context";
+import { formatDisplayDate, formatDisplayDateTime } from "../date-time";
 
 export function ReportDetailPage() {
   const api = useRuaLensApi();
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const { session, notifyDataChanged } = useAppShell();
+  const { displayTimeZone, session, notifyDataChanged } = useAppShell();
   const [report, setReport] = useState<ReportDetail | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [attempt, setAttempt] = useState(0);
@@ -39,16 +40,16 @@ export function ReportDetailPage() {
   }
 
   if (!report) {
-    return <p className="loading-state" aria-busy="true">レポート詳細を読み込んでいます…</p>;
+    return <p className="loading-state state-block" aria-busy="true">レポート詳細を読み込んでいます…</p>;
   }
 
   return (
     <article className="page-stack report-detail">
       <Link className="back-link" to="/reports">← レポート一覧へ</Link>
-      <header className="page-heading page-heading--actions">
+      <header className="page-context page-context--identity page-context--actions">
         <div>
           <h2>{report.orgName}</h2>
-          <p><code>{report.domain}</code> · {formatDate(report.periodBegin)} - {formatDate(report.periodEnd)}</p>
+          <p><code>{report.domain}</code> · {formatDisplayDate(report.periodBegin, displayTimeZone)} - {formatDisplayDate(report.periodEnd, displayTimeZone)}</p>
         </div>
         {session.isAdmin ? (
           <button className="danger-button" type="button" onClick={() => setDeleteOpen(true)}>
@@ -57,28 +58,28 @@ export function ReportDetailPage() {
         ) : null}
       </header>
 
-      <section className="detail-grid" aria-label="レポート情報">
-        <div className="panel">
-          <h3>メタデータ</h3>
-          <dl className="compact-details">
-            <div><dt>外部Report ID</dt><dd>{report.externalReportId}</dd></div>
-            <div><dt>取り込み日時</dt><dd>{formatDateTime(report.importedAt)}</dd></div>
-            <div><dt>取り込んだユーザー</dt><dd>{report.importedBy}</dd></div>
-          </dl>
-        </div>
-        <div className="panel">
-          <h3>公開DMARCポリシー</h3>
-          <ul className="policy-list">
-            <li>p: {report.policy.p}</li>
-            <li>sp: {report.policy.sp ?? "pを継承"}</li>
-            <li>pct: {report.policy.pct}%</li>
-            <li>adkim: {report.policy.adkim}</li>
-            <li>aspf: {report.policy.aspf}</li>
-          </ul>
-        </div>
+      <section className="context-frame report-context" aria-label="レポート情報">
+        <dl className="compact-details fact-list">
+          <div><dt>外部Report ID</dt><dd>{report.externalReportId}</dd></div>
+          <div><dt>取り込み日時</dt><dd>{formatDisplayDateTime(report.importedAt, displayTimeZone)}</dd></div>
+          <div><dt>取り込んだユーザー</dt><dd>{report.importedBy}</dd></div>
+        </dl>
       </section>
 
-      <section className="record-stack">
+      <section className="ledger-section report-policy" aria-labelledby="report-policy-heading">
+        <div className="section-heading">
+          <h3 id="report-policy-heading">公開DMARCポリシー</h3>
+        </div>
+        <dl className="policy-facts">
+          <div><dt>p</dt><dd>{report.policy.p}</dd></div>
+          <div><dt>sp</dt><dd>{report.policy.sp ?? "pを継承"}</dd></div>
+          <div><dt>pct</dt><dd>{report.policy.pct}%</dd></div>
+          <div><dt>adkim</dt><dd>{report.policy.adkim}</dd></div>
+          <div><dt>aspf</dt><dd>{report.policy.aspf}</dd></div>
+        </dl>
+      </section>
+
+      <section className="record-stack record-ledger ledger-section">
         <div className="section-heading">
           <div>
             <h3>送信元IP別レコード</h3>
@@ -94,14 +95,14 @@ export function ReportDetailPage() {
               </span>
             </summary>
             <div className="record-content">
-              <dl className="compact-details">
+              <dl className="compact-details fact-list">
                 <div><dt>disposition</dt><dd>{record.disposition}</dd></div>
                 <div><dt>DMARC成功</dt><dd>{record.dmarcPass ? "成功" : "失敗"}</dd></div>
                 <div><dt>header_from</dt><dd>{record.identifiers.headerFrom}</dd></div>
                 <div><dt>envelope_from</dt><dd>{record.identifiers.envelopeFrom ?? "未設定"}</dd></div>
                 <div><dt>envelope_to</dt><dd>{record.identifiers.envelopeTo ?? "未設定"}</dd></div>
               </dl>
-              <div className="auth-grid">
+              <div className="auth-grid record-evidence">
                 <section>
                   <h4>Policy evaluated</h4>
                   <p>DKIM: {record.policyEvaluated.dkim} / SPF: {record.policyEvaluated.spf}</p>
@@ -148,6 +149,7 @@ export function ReportDetailPage() {
       <DeleteReportDialog
         open={deleteOpen}
         report={report}
+        displayTimeZone={displayTimeZone}
         onClose={() => setDeleteOpen(false)}
         onDeleted={() => {
           notifyDataChanged();
@@ -166,16 +168,4 @@ function classificationLabel(value: ReportDetail["records"][number]["classificat
     return "要確認";
   }
   return "失敗";
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value));
-}
-
-function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("ja-JP", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(new Date(value));
 }

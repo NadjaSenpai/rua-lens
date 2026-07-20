@@ -15,9 +15,10 @@ export function DailyTrendChart({ values }: { values: DashboardResponse["dailyTr
     <figure className="panel trend-figure" aria-label="DMARC成功・失敗の日別推移">
       <div className="section-heading">
         <h3>DMARC成功・失敗の日別推移</h3>
+        <span className="section-note">日別集計: UTC</span>
       </div>
       <div className="chart-frame">
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height={300}>
           <LineChart data={values} margin={{ top: 12, right: 18, bottom: 4, left: 4 }} accessibilityLayer>
             <CartesianGrid stroke="var(--chart-grid)" strokeWidth={1} vertical={false} />
             <XAxis dataKey="date" tick={{ fill: "var(--muted)", fontSize: 12 }} tickLine={false} axisLine={{ stroke: "var(--border-strong)" }} />

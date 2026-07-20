@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
@@ -13,10 +13,10 @@ const detail: ReportDetail = {
   orgName: "Example Reporter",
   externalReportId: "external-1",
   domain: "example.com",
-  periodBegin: "2023-11-14T00:00:00.000Z",
-  periodEnd: "2023-11-15T00:00:00.000Z",
+  periodBegin: "2023-11-14T18:30:00.000Z",
+  periodEnd: "2023-11-15T18:30:00.000Z",
   policy: { p: "reject", sp: null, pct: 100, adkim: "r", aspf: "s" },
-  importedAt: "2023-11-16T02:00:00.000Z",
+  importedAt: "2023-11-16T18:30:00.000Z",
   importedBy: "analyst@example.com",
   records: [
     {
@@ -61,8 +61,9 @@ describe("ReportDetailPage", () => {
 
     expect(await screen.findByRole("heading", { name: "Example Reporter" })).toBeInTheDocument();
     expect(screen.getByText("external-1")).toBeInTheDocument();
-    expect(screen.getByText("p: reject")).toBeInTheDocument();
-    expect(screen.getByText("sp: pを継承")).toBeInTheDocument();
+    const policy = screen.getByRole("region", { name: "公開DMARCポリシー" });
+    expect(within(policy).getByText("reject", { selector: "dd" })).toBeInTheDocument();
+    expect(within(policy).getByText("pを継承", { selector: "dd" })).toBeInTheDocument();
     expect(screen.getByText("192.0.2.10")).toBeInTheDocument();
     expect(screen.getByText("mailer.example.com")).toBeInTheDocument();
     expect(screen.getByText(/selector: mail/)).toBeInTheDocument();
@@ -87,10 +88,15 @@ describe("ReportDetailPage", () => {
     renderWithApi(api);
     await screen.findByRole("heading", { name: "Example Reporter" });
 
+    await user.click(screen.getByRole("radio", { name: "JST" }));
+    expect(screen.getByText("2023/11/15 - 2023/11/16")).toBeInTheDocument();
+    expect(screen.getByText("2023/11/17 3:30")).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "このレポートを削除" }));
     const dialog = screen.getByRole("dialog", { name: "レポートを削除" });
     expect(dialog).toHaveTextContent("Example Reporter");
     expect(dialog).toHaveTextContent("example.com");
+    expect(dialog).toHaveTextContent("2023/11/15 - 2023/11/16");
     await user.click(screen.getByRole("button", { name: "レポートを削除" }));
 
     expect(await screen.findByRole("heading", { name: "レポート" })).toBeInTheDocument();
