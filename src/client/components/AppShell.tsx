@@ -138,7 +138,9 @@ export function AppShell() {
                 <span>JST</span>
               </label>
             </fieldset>
-            <small>表示: {displayTimeZone === "UTC" ? "UTC" : "JST"} / 検索・日別集計: UTC</small>
+            <small>
+              表示: <span className="preference-value">{displayTimeZone === "UTC" ? "UTC" : "JST"}</span> / 検索・日別集計: UTC
+            </small>
           </div>
           <div className="theme-preference">
             <fieldset className="preference-control theme-control">
@@ -177,7 +179,7 @@ export function AppShell() {
             <small aria-live="polite">現在: {resolvedTheme === "dark" ? "ダーク" : "ライト"}</small>
           </div>
           <button className="primary-button" type="button" onClick={openUpload}>
-            レポートをアップロード
+            アップロード
           </button>
         </div>
       </header>

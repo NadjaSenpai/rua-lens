@@ -12,7 +12,7 @@ export function resetDatabase(): void {
 }
 
 export async function openUpload(page: Page) {
-  await page.locator("header").getByRole("button", { name: "レポートをアップロード" }).click();
+  await page.locator("header").getByRole("button", { name: "アップロード" }).click();
   const dialog = page.getByRole("dialog", { name: "DMARCレポートをアップロード" });
   await dialog.waitFor();
   return dialog;

@@ -147,9 +147,10 @@ button:disabled {
 .secondary-button,
 .danger-button,
 .text-button {
-  min-height: 42px;
+  min-height: 34px;
   border-radius: 5px;
-  padding: 10px 16px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
   font-weight: 750;
   white-space: nowrap;
   transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease;
@@ -294,7 +295,7 @@ button:disabled {
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  gap: 18px;
+  gap: 12px;
 }
 
 .time-zone-preference,
@@ -302,11 +303,15 @@ button:disabled {
   display: grid;
   gap: 3px;
   flex: 0 0 auto;
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
 }
 
 .preference-control {
   display: flex;
   gap: 10px;
+  align-items: center;
+  height: 22px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -344,7 +349,14 @@ button:disabled {
 .theme-preference small {
   color: var(--muted);
   font-size: 0.68rem;
+  line-height: 16px;
   white-space: nowrap;
+}
+
+/* Reserve the width of the widest value ("UTC") so toggling to "JST" does not shift the header. */
+.preference-value {
+  display: inline-block;
+  min-width: 2.1em;
 }
 
 .user-email {
@@ -360,7 +372,7 @@ button:disabled {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding-top: clamp(34px, 5vw, 56px);
+  padding-top: clamp(17px, 2.5vw, 28px);
 }
 
 .page-stack {
@@ -595,6 +607,7 @@ button:disabled {
 .scope-strip dl > div {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
   gap: 12px;
   padding: 11px 16px;
 }
@@ -1097,6 +1110,12 @@ td small {
   gap: 16px;
 }
 
+.pagination .secondary-button {
+  min-height: 28px;
+  padding: 3px 10px;
+  font-size: 0.85rem;
+}
+
 .back-link {
   justify-self: start;
 }
@@ -1339,6 +1358,12 @@ td small {
     padding-inline: 16px;
   }
 
+  .time-zone-preference,
+  .theme-preference {
+    padding-left: 0;
+    border-left: 0;
+  }
+
   .app-header,
   .header-identity {
     display: flex;
@@ -1376,7 +1401,7 @@ td small {
   }
 
   .app-content {
-    padding-top: 42px;
+    padding-top: 21px;
   }
 
   .page-heading h2 {

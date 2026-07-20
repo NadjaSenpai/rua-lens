@@ -30,7 +30,7 @@ describe("AppShell", () => {
     expect(screen.getByRole("navigation", { name: "メインナビゲーション" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "ダッシュボード" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "レポート" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "レポートをアップロード" })).not.toHaveLength(0);
+    expect(screen.getAllByRole("button", { name: "アップロード" })).not.toHaveLength(0);
     expect(screen.getByText("analyst@example.com")).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "時刻表示" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "UTC" })).toBeChecked();
@@ -42,7 +42,7 @@ describe("AppShell", () => {
 
     expect(screen.getByRole("radio", { name: "JST" })).toBeChecked();
     expect(localStorage.getItem("rua-lens.display-time-zone")).toBe("Asia/Tokyo");
-    expect(screen.getByText("表示: JST / 検索・日別集計: UTC")).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.tagName === "SMALL" && el.textContent?.replace(/\s+/g, " ").trim() === "表示: JST / 検索・日別集計: UTC")).toBeInTheDocument();
   });
 
   it("restores the persisted display timezone", async () => {
@@ -50,7 +50,7 @@ describe("AppShell", () => {
     renderWithApi(createTestApi());
 
     expect(await screen.findByRole("radio", { name: "JST" })).toBeChecked();
-    expect(screen.getByText("表示: JST / 検索・日別集計: UTC")).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.tagName === "SMALL" && el.textContent?.replace(/\s+/g, " ").trim() === "表示: JST / 検索・日別集計: UTC")).toBeInTheDocument();
   });
 
   it("restores a persisted dark theme", async () => {
