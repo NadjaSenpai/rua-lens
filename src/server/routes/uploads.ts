@@ -55,10 +55,12 @@ uploadRoutes.post(
     }
 
     try {
+      const storageMode = context.get("storageMode");
       const result = await ingestBatch({
         files,
         principal: context.get("principal"),
-        db: context.env.DB,
+        db: storageMode === "stateless" ? undefined : context.env.DB,
+        storageMode,
         requestId: context.get("requestId"),
       });
       const requestLog = context.get("requestLog");

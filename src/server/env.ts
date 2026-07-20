@@ -1,3 +1,4 @@
+import type { StorageMode } from "../shared/api-contract";
 import { ConfigurationError } from "./errors";
 import { parseEmailList } from "./auth/principal";
 
@@ -11,6 +12,7 @@ export type RuntimeEnv = Omit<
   ADMIN_EMAILS?: string;
   DEV_USER_EMAIL?: string;
   DEV_ADMIN_EMAILS?: string;
+  STORAGE_MODE?: string;
 };
 
 export type AccessConfig = {
@@ -35,6 +37,7 @@ export type ServerVariables = {
   principal: import("./auth/principal").Principal;
   requestId: string;
   requestLog: RequestLogState;
+  storageMode: StorageMode;
 };
 
 export type ServerEnv = {
@@ -89,4 +92,12 @@ export function parseDevAuthConfig(env: RuntimeEnv): DevAuthConfig {
   const adminEmails = parseEmailList(env.DEV_ADMIN_EMAILS);
 
   return { userEmail, adminEmails };
+}
+
+export function parseStorageMode(env: RuntimeEnv): StorageMode {
+  const raw = (env.STORAGE_MODE ?? "d1").toLowerCase();
+  if (raw !== "d1" && raw !== "stateless") {
+    throw new ConfigurationError();
+  }
+  return raw;
 }

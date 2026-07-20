@@ -9,6 +9,7 @@ describe("GET /api/session", () => {
     expect(await response.json()).toEqual({
       email: "developer@example.com",
       isAdmin: true,
+      storageMode: "d1",
     });
   });
 });

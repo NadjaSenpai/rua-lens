@@ -6,5 +6,6 @@ export const sessionRoutes = new Hono<ServerEnv>().get("/", (context) => {
   return context.json({
     email: principal.email,
     isAdmin: principal.isAdmin,
+    storageMode: context.get("storageMode"),
   });
 });

@@ -250,6 +250,21 @@ button:disabled {
   white-space: nowrap;
 }
 
+.brand-button {
+  all: unset;
+  font: inherit;
+  cursor: pointer;
+}
+
+.brand-button:hover {
+  opacity: 0.75;
+}
+
+.brand-button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
 .empty-state__label {
   margin: 0;
   color: var(--muted);
@@ -1266,6 +1281,114 @@ td small {
 .upload-results li small {
   grid-column: 2;
   color: var(--fail);
+}
+
+.about-dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: clamp(22px, 4vw, 34px);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--dialog-shadow);
+}
+
+.about-dialog::backdrop {
+  background: var(--dialog-backdrop);
+}
+
+.about-dialog h2 {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+}
+
+.about-notes {
+  display: grid;
+  gap: 8px;
+}
+
+.about-note {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--border);
+  border-radius: 0 4px 4px 0;
+  background: var(--surface-soft);
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.about-note--info {
+  border-left-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface-soft));
+}
+
+.about-note--safe {
+  border-left-color: var(--pass);
+  background: var(--pass-soft);
+}
+
+.about-note--warn {
+  border-left-color: var(--review);
+  background: var(--review-soft);
+}
+
+.about-meta {
+  display: flex;
+  gap: 24px;
+  margin: 18px 0 0;
+  font-size: 0.82rem;
+}
+
+.about-meta div {
+  display: flex;
+  gap: 6px;
+}
+
+.about-meta dt {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.about-meta dd {
+  margin: 0;
+}
+
+.about-copyright {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.about-data-actions {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.about-data-actions h3 {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+}
+
+.about-data-note {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.about-data-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.about-import-result {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--pass);
 }
 
 .dialog-actions {

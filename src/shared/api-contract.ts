@@ -6,9 +6,12 @@ export const UPLOAD_LIMITS = {
   maxInputBytesBatch: 25 * MEBIBYTE,
 } as const;
 
+export type StorageMode = "d1" | "stateless";
+
 export type SessionResponse = {
   email: string;
   isAdmin: boolean;
+  storageMode: StorageMode;
 };
 
 export type ApiErrorResponse = {
@@ -48,6 +51,15 @@ export type UploadBatchResult = {
     rejected: number;
   };
   results: UploadResult[];
+  reports?: StatelessReport[];
+};
+
+export type StatelessReport = {
+  id: string;
+  fingerprint: string;
+  detail: ReportDetail;
+  importedAt: string;
+  importedBy: string;
 };
 
 export type ReportListItem = {

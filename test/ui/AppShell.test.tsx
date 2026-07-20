@@ -22,7 +22,7 @@ describe("AppShell", () => {
   it("shows product navigation, upload action, authenticated email, and display timezone controls", async () => {
     const user = userEvent.setup();
     renderWithApi(createTestApi({
-      getSession: async () => ({ email: "analyst@example.com", isAdmin: false }),
+      getSession: async () => ({ email: "analyst@example.com", isAdmin: false, storageMode: "d1" as const }),
     }));
 
     expect(await screen.findByRole("heading", { name: "RUA Lens" })).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe("AppShell", () => {
         if (attempts === 1) {
           throw new ApiError(500, "INFRASTRUCTURE_ERROR", "セッションを確認できませんでした。", "request-123");
         }
-        return { email: "analyst@example.com", isAdmin: false };
+        return { email: "analyst@example.com", isAdmin: false, storageMode: "d1" as const };
       },
     });
     const user = userEvent.setup();

@@ -1,5 +1,8 @@
-import type { UploadBatchResult, UploadResult } from "../../shared/api-contract";
+import type { StatelessReport, StorageMode, UploadBatchResult, UploadResult } from "../../shared/api-contract";
 import type { Principal } from "../auth/principal";
+import { classifyRecord } from "../domain/classification";
+import type { NormalizedReport } from "../domain/dmarc";
+import { computeFingerprint } from "../domain/fingerprint";
 import { ReportPersistenceError, saveReport } from "../repositories/reports";
 import { extractReportCandidates } from "./extract-report-candidates";
 import { createExpansionBudget, INGEST_LIMITS, type IngestLimits } from "./limits";
@@ -18,17 +21,22 @@ export class IngestInfrastructureError extends Error {
 export async function ingestBatch(input: {
   files: ReadonlyArray<File>;
   principal: Principal;
-  db: D1Database;
+  db?: D1Database;
+  storageMode?: StorageMode;
   limits?: IngestLimits;
   requestId?: string;
 }): Promise<UploadBatchResult> {
   const limits = input.limits ?? INGEST_LIMITS;
+  const stateless = input.storageMode === "stateless";
+
   if (input.files.length > limits.maxFiles || totalInputBytes(input.files) > limits.maxInputBytesBatch) {
     throw new IngestError("SIZE_LIMIT_EXCEEDED");
   }
 
   const budget = createExpansionBudget(limits);
   const results: UploadResult[] = [];
+  const reports: StatelessReport[] = [];
+  const seenFingerprints = new Set<string>();
 
   for (const file of input.files) {
     if (file.size > limits.maxInputBytesPerFile) {
@@ -42,13 +50,43 @@ export async function ingestBatch(input: {
         yieldedCandidate = true;
         try {
           const report = parseDmarcXml(candidate.xml);
-          const saved = await saveReport(input.db, report, input.principal.email);
-          results.push({
-            sourceFileName: candidate.sourceFileName,
-            entryName: candidate.entryName,
-            status: saved.kind,
-            reportId: saved.reportId,
-          });
+
+          if (stateless) {
+            const fingerprint = await computeFingerprint(report.identity);
+            if (seenFingerprints.has(fingerprint)) {
+              results.push({
+                sourceFileName: candidate.sourceFileName,
+                entryName: candidate.entryName,
+                status: "duplicate",
+                reportId: fingerprint,
+              });
+              continue;
+            }
+            seenFingerprints.add(fingerprint);
+            const reportId = crypto.randomUUID();
+            const now = new Date().toISOString();
+            reports.push({
+              id: reportId,
+              fingerprint,
+              detail: normalizedToDetail(report, reportId, now, input.principal.email),
+              importedAt: now,
+              importedBy: input.principal.email,
+            });
+            results.push({
+              sourceFileName: candidate.sourceFileName,
+              entryName: candidate.entryName,
+              status: "inserted",
+              reportId,
+            });
+          } else {
+            const saved = await saveReport(input.db!, report, input.principal.email);
+            results.push({
+              sourceFileName: candidate.sourceFileName,
+              entryName: candidate.entryName,
+              status: saved.kind,
+              reportId: saved.reportId,
+            });
+          }
         } catch (error) {
           if (isIngestError(error)) {
             results.push(rejected(candidate.sourceFileName, candidate.entryName, error));
@@ -79,7 +117,7 @@ export async function ingestBatch(input: {
     }
   }
 
-  return {
+  const batch: UploadBatchResult = {
     requestId: input.requestId ?? crypto.randomUUID(),
     summary: results.reduce(
       (summary, result) => {
@@ -89,6 +127,51 @@ export async function ingestBatch(input: {
       { inserted: 0, duplicate: 0, rejected: 0 },
     ),
     results,
+  };
+
+  if (stateless && reports.length > 0) {
+    batch.reports = reports;
+  }
+
+  return batch;
+}
+
+function normalizedToDetail(
+  report: NormalizedReport,
+  reportId: string,
+  importedAt: string,
+  importedBy: string,
+): import("../../shared/api-contract").ReportDetail {
+  return {
+    id: reportId,
+    orgName: report.identity.orgName,
+    externalReportId: report.identity.reportId,
+    domain: report.identity.domain,
+    periodBegin: new Date(report.identity.periodBegin * 1000).toISOString(),
+    periodEnd: new Date(report.identity.periodEnd * 1000).toISOString(),
+    policy: {
+      p: report.policy.p,
+      sp: report.policy.sp,
+      pct: report.policy.pct,
+      adkim: report.policy.adkim,
+      aspf: report.policy.aspf,
+    },
+    importedAt,
+    importedBy,
+    records: report.records.map((record) => {
+      const decision = classifyRecord(record);
+      return {
+        sourceIp: record.sourceIp,
+        messageCount: record.messageCount,
+        disposition: record.disposition,
+        classification: decision.classification,
+        dmarcPass: decision.dmarcPass,
+        identifiers: record.identifiers,
+        policyEvaluated: record.policyEvaluated,
+        dkimResults: record.dkimResults,
+        spfResults: record.spfResults,
+      };
+    }),
   };
 }
 

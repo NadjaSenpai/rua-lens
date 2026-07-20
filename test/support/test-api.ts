@@ -39,7 +39,7 @@ export function createTestApi(handlers: TestApiHandlers = {}): RuaLensApi & { ca
 
   return {
     calls,
-    getSession: () => handlers.getSession?.() ?? Promise.resolve({ email: "developer@example.com", isAdmin: false }),
+    getSession: () => handlers.getSession?.() ?? Promise.resolve({ email: "developer@example.com", isAdmin: false, storageMode: "d1" as const }),
     upload: (files) => {
       calls.uploads.push([...files]);
       return handlers.upload?.(files) ?? Promise.resolve({

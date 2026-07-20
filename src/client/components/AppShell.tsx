@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import type { SessionResponse } from "../../shared/api-contract";
+import { ApiProvider } from "../api/context";
+import { createLocalApi } from "../api/local-api";
 import { useRuaLensApi } from "../api/use-api";
 import {
   persistDisplayTimeZone,
@@ -18,6 +20,7 @@ import {
 } from "../theme";
 import type { AppShellContext } from "./app-shell-context";
 import { ErrorNotice } from "./ErrorNotice";
+import { AboutDialog } from "./AboutDialog";
 import { UploadDialog } from "./UploadDialog";
 
 export function AppShell() {
@@ -27,11 +30,16 @@ export function AppShell() {
   const [attempt, setAttempt] = useState(0);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [displayTimeZone, setDisplayTimeZoneState] = useState(readDisplayTimeZone);
   const [themePreference, setThemePreferenceState] = useState(readThemePreference);
   const [systemDark, setSystemDark] = useState(systemPrefersDark);
   const uploadTrigger = useRef<HTMLElement | null>(null);
   const resolvedTheme = resolveThemePreference(themePreference, systemDark);
+  const effectiveApi = useMemo(
+    () => (session?.storageMode === "stateless" ? createLocalApi(api) : api),
+    [api, session?.storageMode],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -105,7 +113,11 @@ export function AppShell() {
       <header className="app-header">
         <div className="header-identity">
           <div className="brand-block">
-            <h1>RUA Lens</h1>
+            <h1>
+              <button type="button" className="brand-button" onClick={() => setAboutOpen(true)}>
+                RUA Lens
+              </button>
+            </h1>
           </div>
           <nav className="primary-nav" aria-label="メインナビゲーション">
             <NavLink to="/" end>ダッシュボード</NavLink>
@@ -183,25 +195,33 @@ export function AppShell() {
           </button>
         </div>
       </header>
-      <main id="main-content" className="app-content">
-        <Outlet
-          context={{
-            session,
-            displayTimeZone,
-            setDisplayTimeZone,
-            openUpload,
-            refreshVersion,
-            notifyDataChanged,
-          } satisfies AppShellContext}
+      <ApiProvider api={effectiveApi}>
+        <main id="main-content" className="app-content">
+          <Outlet
+            context={{
+              session,
+              displayTimeZone,
+              setDisplayTimeZone,
+              openUpload,
+              refreshVersion,
+              notifyDataChanged,
+            } satisfies AppShellContext}
+          />
+        </main>
+        <UploadDialog
+          open={uploadOpen}
+          onClose={() => {
+            setUploadOpen(false);
+            uploadTrigger.current?.focus();
+          }}
+          onUploaded={notifyDataChanged}
         />
-      </main>
-      <UploadDialog
-        open={uploadOpen}
-        onClose={() => {
-          setUploadOpen(false);
-          uploadTrigger.current?.focus();
-        }}
-        onUploaded={notifyDataChanged}
+      </ApiProvider>
+      <AboutDialog
+        open={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+        storageMode={session.storageMode}
+        onDataChanged={notifyDataChanged}
       />
     </div>
   );

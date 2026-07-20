@@ -80,7 +80,7 @@ describe("ReportDetailPage", () => {
 
   it("confirms administrator deletion, then returns to the refreshed list", async () => {
     const api = createTestApi({
-      getSession: async () => ({ email: "admin@example.com", isAdmin: true }),
+      getSession: async () => ({ email: "admin@example.com", isAdmin: true, storageMode: "d1" as const }),
       getReport: async () => detail,
       listReports: async () => ({ items: [], page: 1, pageSize: 25, total: 0 }),
     });
@@ -107,7 +107,7 @@ describe("ReportDetailPage", () => {
   it("keeps the detail visible and allows retry after delete failure", async () => {
     let attempts = 0;
     const api = createTestApi({
-      getSession: async () => ({ email: "admin@example.com", isAdmin: true }),
+      getSession: async () => ({ email: "admin@example.com", isAdmin: true, storageMode: "d1" as const }),
       getReport: async () => detail,
       deleteReport: async () => {
         attempts += 1;

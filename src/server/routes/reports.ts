@@ -15,11 +15,17 @@ const MAXIMUM_PAGE_SIZE = 100;
 export const reportRoutes = new Hono<ServerEnv>();
 
 reportRoutes.get("/", async (context) => {
+  if (context.get("storageMode") === "stateless") {
+    return context.json({ items: [], page: 1, pageSize: DEFAULT_PAGE_SIZE, total: 0 });
+  }
   const query = parseListQuery(context.req.query());
   return context.json(await listReports(context.env.DB, query));
 });
 
 reportRoutes.get("/:id", async (context) => {
+  if (context.get("storageMode") === "stateless") {
+    throw new NotFoundError();
+  }
   const report = await getReport(context.env.DB, context.req.param("id"));
   if (!report) {
     throw new NotFoundError();
@@ -28,6 +34,9 @@ reportRoutes.get("/:id", async (context) => {
 });
 
 reportRoutes.delete("/:id", async (context) => {
+  if (context.get("storageMode") === "stateless") {
+    return context.body(null, 204);
+  }
   if (!context.get("principal").isAdmin) {
     throw new ForbiddenError();
   }
@@ -60,4 +69,3 @@ function positiveInteger(value: string | undefined, fallback: number): number {
   }
   return parsed;
 }
-

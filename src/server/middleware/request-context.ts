@@ -1,5 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import type { ServerEnv } from "../env";
+import { parseStorageMode } from "../env";
 
 export const requestContext = createMiddleware<ServerEnv>(async (context, next) => {
   const requestId = crypto.randomUUID();
@@ -12,6 +13,7 @@ export const requestContext = createMiddleware<ServerEnv>(async (context, next) 
   };
   context.set("requestId", requestId);
   context.set("requestLog", requestLog);
+  context.set("storageMode", parseStorageMode(context.env as import("../env").RuntimeEnv));
   context.header("X-Request-ID", requestId);
 
   try {
