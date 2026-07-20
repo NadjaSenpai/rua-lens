@@ -20,7 +20,10 @@
     "AUTH_MODE": "access",
     "ACCESS_TEAM_DOMAIN": "https://example.cloudflareaccess.com",
     "ACCESS_AUD": "00000000000000000000000000000000",
-    "ADMIN_EMAILS": "admin@example.com"
+    "ADMIN_EMAILS": "admin@example.com",
+    // "d1" (default) persists to D1; "stateless" skips D1 and returns
+    // parsed reports directly — the client stores them in IndexedDB.
+    "STORAGE_MODE": "d1"
   },
   "env": {
     "e2e-nonadmin": {

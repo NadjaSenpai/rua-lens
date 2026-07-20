@@ -1,6 +1,11 @@
 # RUA Lens
 
-RUA Lens is a self-hosted web application for turning DMARC aggregate reports into searchable, human-readable analysis. It runs as one Cloudflare Worker containing a React SPA and Hono API, with normalized data stored in Cloudflare D1.
+RUA Lens is a self-hosted web application for turning DMARC aggregate reports into searchable, human-readable analysis. It runs as one Cloudflare Worker containing a React SPA and Hono API.
+
+Two storage modes are available:
+
+- **D1 mode** (default) — normalized data is stored in Cloudflare D1 with server-side deduplication and shared dashboards.
+- **Stateless mode** — the Worker parses uploads and returns results directly; the browser stores them in IndexedDB. No database setup required.
 
 ## What it does
 
@@ -46,7 +51,7 @@ npm exec -- wrangler d1 migrations apply DB --local
 npm run dev
 ```
 
-The local configuration uses an explicit development identity from `.dev.vars`. Production configuration must use Cloudflare Access and fails closed when Access settings are missing.
+The local configuration uses an explicit development identity from `.dev.vars`. Production D1 deployments must use Cloudflare Access and fail closed when Access settings are missing. Stateless deployments can run with `AUTH_MODE=none` for public access.
 
 To reproduce the upload flow, open `http://127.0.0.1:5173`, choose **レポートをアップロード**, and select `test/fixtures/report-single.xml`. The dashboard should show four messages and a 100% DMARC success rate. Uploading the same fixture again should return **登録済み** without creating a second report.
 
@@ -72,7 +77,7 @@ npm run check:dependency-licenses
 
 ## Self-hosting
 
-See [docs/operations/self-hosting.md](docs/operations/self-hosting.md) for D1, Cloudflare Access, configuration, deployment, backup, and release validation instructions.
+See [docs/operations/self-hosting.md](docs/operations/self-hosting.md) for D1, stateless, Cloudflare Access, configuration, deployment, backup, and release validation instructions.
 
 ## Deliberate exclusions in v0.1.0
 
@@ -83,6 +88,7 @@ See [docs/operations/self-hosting.md](docs/operations/self-hosting.md) for D1, C
 - alerts and automated policy recommendations;
 - multi-tenant SaaS operation;
 - deployment outside Cloudflare;
+- cross-device sync in stateless mode;
 - deleted-data restoration.
 
 ## Acknowledgements

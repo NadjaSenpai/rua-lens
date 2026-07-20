@@ -6,7 +6,7 @@ export type RuntimeEnv = Omit<
   Env,
   "AUTH_MODE" | "ACCESS_TEAM_DOMAIN" | "ACCESS_AUD" | "ADMIN_EMAILS"
 > & {
-  AUTH_MODE: "access" | "dev" | string;
+  AUTH_MODE: "access" | "dev" | "none" | string;
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;
   ADMIN_EMAILS?: string;

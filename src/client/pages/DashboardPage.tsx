@@ -14,7 +14,7 @@ import { formatDisplayDate, type DisplayTimeZone } from "../date-time";
 
 export function DashboardPage() {
   const api = useRuaLensApi();
-  const { displayTimeZone, openUpload, refreshVersion } = useAppShell();
+  const { session, displayTimeZone, openUpload, refreshVersion } = useAppShell();
   const [searchParams, setSearchParams] = useSearchParams();
   const [result, setResult] = useState<{ queryKey: string; data: DashboardResponse } | null>(null);
   const [errorResult, setErrorResult] = useState<{ queryKey: string; error: unknown } | null>(null);
@@ -139,7 +139,11 @@ export function DashboardPage() {
         <section className="empty-state">
           <p className="empty-state__label">最初のレポートを追加</p>
           <h3>DMARCレポートを安全に読み解く</h3>
-          <p>XML、gzip、ZIPをWorker内で解析し、正規化した結果だけを保存します。元ファイルは保存しません。</p>
+          <p>
+            XML、gzip、ZIPをWorker内で解析し、正規化した結果だけを
+            {session.storageMode === "stateless" ? "このブラウザに" : ""}
+            保存します。元ファイルやメールは送信・保存しません。
+          </p>
           <div className="empty-state__actions">
             <button className="primary-button" type="button" onClick={openUpload}>
               レポートをアップロード

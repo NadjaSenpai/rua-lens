@@ -6,7 +6,7 @@ import {
   openLocalDb,
   putReports,
 } from "../storage/local-db";
-import { ApiError, type ReportListQuery, type ReportScopeQuery, type RuaLensApi } from "./types";
+import { ApiError, type ReportScopeQuery, type RuaLensApi } from "./types";
 
 function toLocalScope(query?: ReportScopeQuery): LocalScope {
   return { domain: query?.domain, start: query?.from, end: query?.to };

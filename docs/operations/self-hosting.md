@@ -94,6 +94,29 @@ The probe applies migrations to that database, starts `wrangler dev --remote`, a
 
 Record only the date, Wrangler version, and pass/fail result. Do not store the temporary URL, account ID, database ID, report data, or Access configuration in the repository.
 
+## Stateless deployment (no D1)
+
+Set `STORAGE_MODE` to `stateless` in `wrangler.jsonc`:
+
+```jsonc
+"vars": {
+  "STORAGE_MODE": "stateless",
+  // …other vars…
+}
+```
+
+In this mode the Worker does not read from or write to D1. Uploaded XML is parsed and returned directly in the upload response; the client stores results in the browser's IndexedDB. The `d1_databases` binding can be removed entirely.
+
+Stateless deployments do not require `wrangler d1 create`, migrations, or database backups. The About dialog offers JSON export/import so users can back up or transfer their local data.
+
+Trade-offs:
+
+- Data lives only in the user's browser. Clearing site data deletes all reports.
+- There is no cross-device synchronization or shared dashboard.
+- The duplicate-detection gate is client-side only.
+
+To switch an existing D1 deployment to stateless, change `STORAGE_MODE` and redeploy. Existing D1 data remains in the database but is no longer served. To switch back, revert the variable.
+
 ## Data retention and deletion
 
 RUA Lens does not store original uploads. It stores normalized report content and the importing user's email address until an administrator deletes the report. There is no automatic expiration.

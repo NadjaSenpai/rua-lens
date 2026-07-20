@@ -66,7 +66,7 @@ describe("DashboardPage", () => {
 
     expect(await screen.findByRole("heading", { name: "DMARCレポートを安全に読み解く" })).toBeInTheDocument();
     expect(screen.getByText(/XML、gzip、ZIPをWorker内で解析/)).toBeInTheDocument();
-    expect(screen.getByText(/元ファイルは保存しません/)).toBeInTheDocument();
+    expect(screen.getByText(/元ファイルやメールは送信・保存しません/)).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "アップロード" })).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "レポートをアップロード" })).toHaveLength(1);
   });

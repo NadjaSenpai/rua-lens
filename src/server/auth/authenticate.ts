@@ -15,6 +15,10 @@ export async function authenticateRequest(
   env: RuntimeEnv,
   verifier: AccessTokenVerifier = verifyRemoteAccessToken,
 ): Promise<Principal> {
+  if (env.AUTH_MODE === "none") {
+    return createPrincipal("anonymous@local", []);
+  }
+
   if (env.AUTH_MODE === "dev") {
     const config = parseDevAuthConfig(env);
     return createPrincipal(config.userEmail, config.adminEmails);
