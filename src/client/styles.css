@@ -409,12 +409,15 @@ button:disabled {
 }
 
 .page-context p {
-  max-width: 46ch;
+  /* 72ch ≈ 全角36字: CJK glyphs are ~2ch wide, so ch-based caps must be doubled. */
+  max-width: 72ch;
   margin: 0;
   color: var(--ink);
   font-size: clamp(1.05rem, 2vw, 1.3rem);
   font-weight: 650;
   line-height: 1.5;
+  text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .page-context--identity {
@@ -560,12 +563,14 @@ button:disabled {
 }
 
 .dashboard-intro p {
-  max-width: 46ch;
+  max-width: 72ch;
   margin: 0;
   color: var(--ink);
   font-size: clamp(1.05rem, 2vw, 1.3rem);
   font-weight: 650;
   line-height: 1.5;
+  text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .dashboard-context {
@@ -758,17 +763,19 @@ button:disabled {
 
 .empty-state h2,
 .empty-state h3 {
-  max-width: 16ch;
   margin: 10px 0;
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-size: clamp(1.8rem, 4vw, 2.75rem);
   line-height: 1.08;
   letter-spacing: -0.05em;
+  text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .empty-state p:not(.empty-state__label) {
   max-width: 58ch;
   color: var(--muted);
   line-height: 1.7;
+  word-break: auto-phrase;
 }
 
 .empty-state__actions {
