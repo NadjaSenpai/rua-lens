@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!DOCTYPE feedback [<!ENTITY example "example.com">]>
+<feedback><report_metadata><org_name>&example;</org_name></report_metadata></feedback>

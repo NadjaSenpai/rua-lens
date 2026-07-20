@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "rua-lens",
+  "main": "./src/server/index.ts",
+  "compatibility_date": "2026-07-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rua-lens",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "./migrations"
+    }
+  ],
+  "vars": {
+    "AUTH_MODE": "access",
+    "ACCESS_TEAM_DOMAIN": "https://example.cloudflareaccess.com",
+    "ACCESS_AUD": "00000000000000000000000000000000",
+    "ADMIN_EMAILS": "admin@example.com"
+  },
+  "env": {
+    "e2e-nonadmin": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "rua-lens",
+          "database_id": "00000000-0000-0000-0000-000000000000",
+          "migrations_dir": "./migrations"
+        }
+      ],
+      "vars": {
+        "AUTH_MODE": "access",
+        "ACCESS_TEAM_DOMAIN": "https://example.cloudflareaccess.com",
+        "ACCESS_AUD": "00000000000000000000000000000000",
+        "ADMIN_EMAILS": "admin@example.com"
+      }
+    }
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.01
+  }
+}
