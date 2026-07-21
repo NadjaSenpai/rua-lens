@@ -82,7 +82,7 @@ See [docs/operations/self-hosting.md](docs/operations/self-hosting.md) for D1, s
 
 ## Deliberate exclusions in v0.1.0
 
-- Gmail, IMAP, or Email Routing integration;
+- Gmail or IMAP pull-based ingestion;
 - original report storage or download;
 - ASN or provider enrichment;
 - alerts and automated policy recommendations;

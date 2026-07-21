@@ -1,6 +1,7 @@
 import { env } from "cloudflare:test";
 import { describe, expect, it, vi } from "vitest";
 import { handleEmail } from "../../src/server/email/handle-email";
+import { INGEST_LIMITS } from "../../src/server/ingest/limits";
 import type { RuntimeEnv } from "../../src/server/env";
 import reportSingle from "../fixtures/report-single.xml?raw";
 import {
@@ -138,6 +139,27 @@ describe("handleEmail", () => {
 
     const row = await env.DB.prepare("SELECT COUNT(*) as count FROM reports").first<{ count: number }>();
     expect(row!.count).toBe(1);
+  });
+
+  it("does not throw when ingestBatch fails", async () => {
+    const raw = buildRawEmail({
+      attachments: [xmlAttachment("report.xml", "<not-valid-xml/>")],
+    });
+
+    await expect(handleEmail(createMessage(raw), testEnv(), testCtx())).resolves.toBeUndefined();
+  });
+
+  it("rejects email exceeding size limit", async () => {
+    const raw = buildRawEmail({
+      attachments: [xmlAttachment("report.xml", reportSingle)],
+    });
+    const message = createMessage(raw);
+    (message as { rawSize: number }).rawSize = INGEST_LIMITS.maxRequestBytes + 1;
+
+    await handleEmail(message, testEnv(), testCtx());
+
+    const row = await env.DB.prepare("SELECT COUNT(*) as count FROM reports").first<{ count: number }>();
+    expect(row!.count).toBe(0);
   });
 
   it("uses email-ingest@rua-lens as the importing identity", async () => {

@@ -3,6 +3,7 @@ import type { RuntimeEnv } from "../env";
 import { parseStorageMode } from "../env";
 import { createPrincipal } from "../auth/principal";
 import { ingestBatch } from "../ingest/ingest-batch";
+import { INGEST_LIMITS } from "../ingest/limits";
 
 const DMARC_CONTENT_TYPES = new Set([
   "application/xml",
@@ -38,6 +39,11 @@ export async function handleEmail(
   try {
     const storageMode = parseStorageMode(env);
     if (storageMode === "stateless") {
+      return;
+    }
+
+    if (message.rawSize > INGEST_LIMITS.maxRequestBytes) {
+      console.log(`Email rejected: size ${message.rawSize} exceeds limit ${INGEST_LIMITS.maxRequestBytes}`);
       return;
     }
 
