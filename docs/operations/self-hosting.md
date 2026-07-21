@@ -117,6 +117,34 @@ Trade-offs:
 
 To switch an existing D1 deployment to stateless, change `STORAGE_MODE` and redeploy. Existing D1 data remains in the database but is no longer served. To switch back, revert the variable.
 
+## Email ingestion (optional)
+
+RUA Lens can receive DMARC aggregate reports directly via email using Cloudflare Email Routing. This eliminates manual file downloads from Gmail or other mailboxes.
+
+### Setup
+
+1. Enable Email Routing on your domain in the Cloudflare dashboard (Compute & AI > Email Service > Email Routing).
+2. Create a routing rule that sends `dmarc@your-domain.com` (or any address you choose) to the `rua-lens` Worker.
+3. Update your DMARC DNS record to point RUA at the receiving address:
+
+```
+_dmarc.example.com TXT "v=DMARC1; p=none; rua=mailto:dmarc@example.com"
+```
+
+No `wrangler.jsonc` changes are needed. The email handler is always present in the Worker but only processes mail when Email Routing sends messages to it.
+
+### How it works
+
+The Worker parses the incoming email with `postal-mime`, extracts XML, gzip, and ZIP attachments, and feeds them through the same ingestion pipeline used by manual uploads. Reports are deduplicated and stored in D1.
+
+Email-ingested reports appear on the dashboard with the importing identity `email-ingest@rua-lens`.
+
+### Limitations
+
+- Email ingestion requires D1 mode (`STORAGE_MODE=d1`). In stateless mode the handler returns without processing.
+- The handler does not bounce mail. Parse errors and unsupported attachments are logged and silently discarded.
+- There is no sender verification. Rely on Email Routing rules to control which addresses reach the Worker.
+
 ## Data retention and deletion
 
 RUA Lens does not store original uploads. It stores normalized report content and the importing user's email address until an administrator deletes the report. There is no automatic expiration.

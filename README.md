@@ -10,6 +10,7 @@ Two storage modes are available:
 ## What it does
 
 - accepts DMARC XML, gzip, and ZIP uploads;
+- accepts DMARC reports via email (Cloudflare Email Routing);
 - detects formats from content rather than filenames alone;
 - rejects unsafe XML and archive paths;
 - preserves multiple DKIM, SPF, and policy-override results;
@@ -81,7 +82,6 @@ See [docs/operations/self-hosting.md](docs/operations/self-hosting.md) for D1, s
 
 ## Deliberate exclusions in v0.1.0
 
-- automatic mail ingestion;
 - Gmail, IMAP, or Email Routing integration;
 - original report storage or download;
 - ASN or provider enrichment;
