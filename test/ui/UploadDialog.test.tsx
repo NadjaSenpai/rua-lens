@@ -128,7 +128,7 @@ describe("UploadDialog", () => {
     expect(screen.getByText("report.xml")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "アップロードを実行" }));
-    expect(await screen.findByText("登録")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(attempts).toBe(2);
   });
 });

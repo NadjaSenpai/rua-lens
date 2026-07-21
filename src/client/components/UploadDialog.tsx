@@ -56,8 +56,12 @@ export function UploadDialog({
     setError(null);
     try {
       const nextResult = await api.upload(files);
-      setResult(nextResult);
       onUploaded();
+      if (nextResult.summary.rejected === 0) {
+        close();
+      } else {
+        setResult(nextResult);
+      }
     } catch (reason) {
       setError(reason);
     } finally {

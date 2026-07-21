@@ -147,8 +147,9 @@ function normalizeDkimResult(value: unknown): NormalizedDkimResult {
   if (!result) {
     throw new IngestError("NOT_DMARC_REPORT");
   }
+  const domain = optionalString(result, "domain");
   return {
-    domain: requiredDomain(requiredString(result, "domain")),
+    domain: domain ? requiredDomain(domain) : "",
     selector: optionalString(result, "selector"),
     result: requiredEnum(result, "result", dkimResults),
     humanResult: optionalString(result, "human_result"),
@@ -173,7 +174,7 @@ function normalizeOverride(value: unknown): NormalizedPolicyOverride {
     throw new IngestError("NOT_DMARC_REPORT");
   }
   return {
-    type: requiredEnum(override, "type", overrideTypes),
+    type: optionalEnum(override, "type", overrideTypes) ?? "other",
     comment: optionalString(override, "comment"),
   };
 }

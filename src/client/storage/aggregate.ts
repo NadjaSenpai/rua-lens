@@ -86,7 +86,7 @@ export function aggregateDashboard(reports: StoredReport[], scope: LocalScope): 
     summary: {
       totalMessages,
       dmarcPassMessages,
-      dmarcPassRate: totalMessages > 0 ? Math.round((dmarcPassMessages / totalMessages) * 1000) / 10 : 0,
+      dmarcPassRate: totalMessages > 0 ? dmarcPassMessages / totalMessages : 0,
       passMessages,
       reviewMessages,
       failMessages,
@@ -127,7 +127,7 @@ function toListItem(stored: StoredReport): ReportListItem {
     periodBegin: d.periodBegin,
     periodEnd: d.periodEnd,
     totalMessages,
-    dmarcPassRate: totalMessages > 0 ? Math.round((dmarcPass / totalMessages) * 1000) / 10 : 0,
+    dmarcPassRate: totalMessages > 0 ? dmarcPass / totalMessages : 0,
     importedAt: stored.importedAt,
     importedBy: stored.importedBy,
   };
